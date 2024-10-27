@@ -1,0 +1,16 @@
+export default {
+  text: "white",
+  border: "black",
+  bgColor: "green",
+  blue: "#4f6a7a",
+  tomato: "#f9290c",
+  gray: "gray",
+  white: "white",
+  red: "red",
+  black: "black",
+  headerColor: "#105089",
+  skyblue: "skyblue",
+  lightBlue: "#e1f1ff",
+  semiSky: "#bcd9f1",
+  nebiBlue: "#6f9bbf",
+};
