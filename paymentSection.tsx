@@ -37,8 +37,8 @@ const styles = StyleSheet.create({
     elevation: 3, // For Android shadow
   },
   paymentIcon: {
-    width: 150, // Set a specific width for the icon
-    height: 150, // Set a specific height for the icon
+    width: 400, // Set a specific width for the icon
+    height: 500, // Set a specific height for the icon
     marginTop: 10, // Space above the icon
   },
   title: {
