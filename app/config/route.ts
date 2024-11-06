@@ -1,11 +1,12 @@
 // route.ts
-import WelcomeScreen from "../screens/welcomeScreen";
+import WelcomeScreen from "../screens/user/welcomeScreen";
 import LoginScreen from "../login/loginPage";
-import AvailableRooms from "../screens/availableRoom";
-import Setting from "../screens/setting";
-import MyRoom from "../screens/myRoom";
-import PaymentSection from "@/paymentSection";
-import AboutUs from "../screens/aboutUs";
+import AvailableRooms from "../screens/user/availableRoom";
+import Setting from "../screens/user/setting";
+import MyRoom from "../screens/user/myRoom";
+import PaymentSection from "@/app/screens/user/paymentSection";
+import AboutUs from "../screens/user/aboutUs";
+import Home from "../screens/admin/home";
 
 // Lazy load your screens
 // const WelcomeScreen = lazy(() => import("../screens/welcomeScreen"));
@@ -13,22 +14,10 @@ import AboutUs from "../screens/aboutUs";
 // const Setting = lazy(() => import("../screens/setting"));
 // const Login = lazy(() => import("../login/loginPage"));
 
-// Define a type for valid Entypo icon names
-// type EntypoIconName =
-//   | "home"
-//   | "folder"
-//   | "info"
-//   | "cog"
-//   | "user"
-//   | "login"
-//   | "log-out"
-//   | "trash"
-//   | "users"
-//   | undefined; // allow undefined if you want to optionally include an icon
 
-// type AntDesignName = "qrcode" | undefined;
 
 const coreRoutes = [
+  //user routes
   {
     name: "Gharbeti Home",
     component: WelcomeScreen,
@@ -64,6 +53,12 @@ const coreRoutes = [
     name: "Login",
     component: LoginScreen,
     icon: "login",
+  },
+  //admin routes
+  {
+    name: "Home",
+    component: Home,
+    icon: "home",
   },
 ];
 

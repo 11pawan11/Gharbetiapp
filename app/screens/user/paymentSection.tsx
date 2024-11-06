@@ -1,30 +1,35 @@
 import React from "react";
-import { Image, StyleSheet, View, Text } from "react-native";
+import { Image, StyleSheet, View, Text, StatusBar } from "react-native";
+import color from "../../constants/color";
+import { useThemeMode } from "../../context/themeContext";
 
 const PaymentSection = () => {
+  const { themeStyle } = useThemeMode();
+  const backgroundTheme = themeStyle(color.black, color.white);
+  const textColor = themeStyle(color.white, color.gray);
   return (
-    <View style={styles.gradient}>
- 
-        <Text style={styles.title}>Secure Payment</Text>
-        <Image
-          style={styles.paymentIcon}
-          source={require("./assets/images/paymentQr.jpg")}
-          resizeMode="contain"
-        />
+    <View style={[styles.gradient, { backgroundColor: backgroundTheme }]}>
+      <StatusBar barStyle={"light-content"} backgroundColor={color.green} />
+      <Text style={[styles.title, { color: textColor }]}>Secure Payment</Text>
+      <Image
+        style={styles.paymentIcon}
+        source={require("../../../assets/images/paymentQr.jpg")}
+        resizeMode="contain"
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
     flex: 1,
     justifyContent: "center",
     alignItems: "center", // Center items
-    marginVertical: 10, // Add vertical margin for spacing
+    marginVertical: 10,
+    marginHorizontal: 10,
   },
   gradient: {
-    borderRadius: 15, // Rounded corners for the gradient background
+    flex: 1,
     padding: 20, // Padding inside the gradient
     alignItems: "center", // Center the content
     shadowColor: "#000", // Shadow color
@@ -44,7 +49,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24, // Increase font size
     fontWeight: "bold", // Bold text
-    marginBottom: 10, // Space below the title
     color: "#333", // Dark color for the title
   },
 });

@@ -1,8 +1,9 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import CustomText from "../hook/customText";
-import color from "../constants/color";
+import CustomText from "../../hook/customText";
+import color from "../../constants/color";
 import { ScrollView } from "react-native-gesture-handler";
-import PaymentSection from "@/paymentSection";
+import { useThemeMode } from "../../context/themeContext";
+import React from "react";
 
 const MyRoom = ({ navigation }: { navigation: any }) => {
   const date = new Date();
@@ -26,36 +27,49 @@ const MyRoom = ({ navigation }: { navigation: any }) => {
     totalAmount: 6000,
   };
 
+  const { themeStyle } = useThemeMode();
+  const backgroundTheme = themeStyle(color.semiBlack, color.offWhite);
+  const colorText = themeStyle(color.white, color.semiBlack);
+  const buttonColor = themeStyle(color.lightGray, color.headerColor);
+  const buttonTextColor = themeStyle(color.black, color.white);
+  const cardBackground = themeStyle(color.cardBlack, color.white);
+  const previousCardBackground = themeStyle(color.previousBlack, color.semiSky);
+  const cardText = themeStyle(color.white, color.semiBlack);
+
   return (
     <ScrollView>
-      <View style={styles.container}>
-        <CustomText style={styles.headerText}>
+      <View style={[styles.container, { backgroundColor: backgroundTheme }]}>
+        <CustomText style={[styles.headerText, { color: colorText }]}>
           This Month's Room Rent
         </CustomText>
-        <CustomText style={styles.dateText}>{date.toDateString()}</CustomText>
+        <CustomText style={[styles.dateText, { color: colorText }]}>
+          {date.toDateString()}
+        </CustomText>
 
         {/* Current Month Card */}
-        <TouchableOpacity style={styles.card}>
-          <CustomText style={styles.sectionTitle}>Current Month</CustomText>
-          <CustomText style={styles.labelText}>
+        <TouchableOpacity
+          style={[styles.card, { backgroundColor: cardBackground }]}
+        >
+          <CustomText style={[styles.sectionTitle]}>Current Month</CustomText>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Month:{" "}
             <CustomText style={styles.valueText}>
               {currentMonthData.month}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Total Room:{" "}
             <CustomText style={styles.valueText}>
               {currentMonthData.totalRoom}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Room Rent:{" "}
             <CustomText style={styles.valueText}>
               Rs. {currentMonthData.roomRent}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Electricity:{" "}
             <CustomText
               style={[
@@ -69,59 +83,65 @@ const MyRoom = ({ navigation }: { navigation: any }) => {
               {currentMonthData.electricity} units
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Waste:{" "}
             <CustomText style={styles.valueText}>
               Rs. {currentMonthData.waste}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.totalAmountText}>
+          <CustomText style={[styles.totalAmountText, { color: cardText }]}>
             Total Amount: Rs. {currentMonthData.totalAmount}
           </CustomText>
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, { backgroundColor: buttonColor }]}
             onPress={() => navigation.navigate("Payment QR")}
           >
-            <CustomText style={styles.buttonText}>
+            <CustomText style={[styles.buttonText, { color: buttonTextColor }]}>
               {"Click here to pay"}
             </CustomText>
           </TouchableOpacity>
         </TouchableOpacity>
 
         {/* Comparison with Previous Month */}
-        <View style={[styles.card, styles.previousCard]}>
+        <View
+          style={[
+            styles.card,
+            styles.previousCard,
+            { backgroundColor: previousCardBackground },
+          ]}
+        >
           <CustomText style={styles.sectionTitle}>Previous Month</CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Month:{" "}
             <CustomText style={styles.valueText}>
               {previousMonthData.month}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Total Room:{" "}
             <CustomText style={styles.valueText}>
               {previousMonthData.totalRoom}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Room Rent:{" "}
             <CustomText style={styles.valueText}>
               Rs. {previousMonthData.roomRent}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Electricity:{" "}
             <CustomText style={styles.valueText}>
               {previousMonthData.electricity} units
             </CustomText>
           </CustomText>
-          <CustomText style={styles.labelText}>
+          <CustomText style={[styles.labelText, { color: colorText }]}>
             Waste:{" "}
             <CustomText style={styles.valueText}>
               Rs. {previousMonthData.waste}
             </CustomText>
           </CustomText>
-          <CustomText style={styles.totalAmountText}>
+          <CustomText style={[styles.totalAmountText, { color: cardText }]}>
             Total Amount: Rs. {previousMonthData.totalAmount}
           </CustomText>
           <CustomText style={styles.lastmonth}>
@@ -136,7 +156,6 @@ const MyRoom = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: color.semiSky,
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -199,13 +218,16 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: color.white,
-    fontSize: 16,
+    fontSize: 18,
     textAlign: "center",
+    fontWeight: "800",
   },
   lastmonth: {
     color: color.green,
     textAlign: "right",
-    marginVertical:10
+    marginTop: 15,
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
 

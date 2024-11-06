@@ -18,4 +18,10 @@ export default {
   green: "green",
   semiBlack: "#171815",
   lightRed: "#f9220ee0",
+  cardBlack: "#2c2120",
+  previousBlack: "#221a19",
+  offWhite: "#ecfaff",
+  lightWhite: "#f1f1f1 ",
+  sucessGreen: "#d7ffc8 ",
+  headerGray: "#414340",
 };

@@ -33,7 +33,12 @@ const CustomDrawerContent = (props: any) => (
 const NavigationRoute = () => {
   const { isDarkMode, toggleTheme, themeStyle } = useThemeMode();
 
-  const backgroundColorOfTheme = themeStyle(color.lightGray, color.headerColor);
+  const backgroundColorOfTheme = themeStyle(color.headerGray, color.headerColor);
+  const backgroundColorofDrawer = themeStyle(color.headerGray, color.white);
+  const iconColor = themeStyle(color.white, color.headerColor);
+  const drawerTextColor = themeStyle(color.white, color.headerColor);
+  const drawerActiveTintColor = themeStyle(color.black, color.skyblue);
+
 
   return (
     <NavigationContainer independent={true}>
@@ -84,10 +89,14 @@ const NavigationRoute = () => {
               name={router.name}
               component={router.component}
               options={{
-                drawerActiveTintColor: color.headerColor,
-                drawerActiveBackgroundColor: color.skyblue,
+                drawerActiveTintColor: drawerTextColor,
+                drawerActiveBackgroundColor: drawerActiveTintColor,
                 drawerType: "slide",
+                drawerStyle: {
+                  backgroundColor: backgroundColorofDrawer,
+                },
                 drawerLabelStyle: {
+                  color:drawerTextColor,
                   fontSize: 16,
                   fontWeight: "bold",
                 },
@@ -112,13 +121,13 @@ const NavigationRoute = () => {
                     <Entypo
                       name={router.icon as any}
                       size={24}
-                      color={color.headerColor}
+                      color={iconColor}
                     />
                   ) : (
                     <AntDesign
                       name={router.icon as any}
                       size={24}
-                      color={color.headerColor}
+                      color={iconColor}
                     />
                   );
                 },

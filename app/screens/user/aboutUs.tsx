@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, View } from "react-native";
-import CustomText from "../hook/customText";
+import CustomText from "../../hook/customText";
 
 const AboutUs = () => {
   return (

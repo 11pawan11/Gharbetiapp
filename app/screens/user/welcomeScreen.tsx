@@ -6,10 +6,11 @@ import {
   View,
   Text,
 } from "react-native";
-import color from "../constants/color";
+import color from "../../constants/color";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import CustomText from "../hook/customText";
-import { useThemeMode } from "../context/themeContext";
+import CustomText from "../../hook/customText";
+import { useThemeMode } from "../../context/themeContext";
+import React from "react";
 
 const WelcomeScreen = () => {
   const { themeStyle } = useThemeMode();
@@ -39,7 +40,7 @@ const WelcomeScreen = () => {
             <Image
               style={welcomScreens.gharbeti}
               resizeMode="contain"
-              source={require("../../assets/images/gharbeti2.png")}
+              source={require("../../../assets/images/gharbeti2.png")}
             />
             <Text style={[welcomScreens.text, { color: textTheme }]}>
               Welcome to Pawan Home. You will get notified when your rent
@@ -103,6 +104,19 @@ const WelcomeScreen = () => {
           >
             <CustomText style={[welcomScreens.text, { color: textTheme }]}>
               Electricity Per Unit (EPC): Rs.14.00
+            </CustomText>
+          </View>
+          <View
+            style={[
+              welcomScreens.block4,
+              {
+                backgroundColor: backgroundBlock3,
+                borderColor: borderColorBlock,
+              },
+            ]}
+          >
+            <CustomText style={[welcomScreens.text, { color: textTheme }]}>
+              Available Rooms:{"N/A"}
             </CustomText>
           </View>
         </View>
