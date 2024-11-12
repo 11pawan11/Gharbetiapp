@@ -5,6 +5,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { RootStackParamList } from "../veryFistScreen";
+import { useThemeMode } from "./themeContext";
+import { useToast } from "../hook/customToast";
 
 interface UserRoleProps {
   user: User | null;
@@ -32,26 +34,30 @@ export const UserRoleCheckProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const navigation = useNavigation<NavigationProp>();
+  const { showToast } = useToast();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await AsyncStorage.setItem("adminToken", JSON.stringify(user));
-        setUser(user);
-      } else {
-        await AsyncStorage.removeItem("adminToken");
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+  //     if (user) {
+  //       await AsyncStorage.setItem("adminToken", JSON.stringify(user));
+  //       setUser(user);
+  //     } else {
+  //       await AsyncStorage.removeItem("adminToken");
+  //       setUser(null);
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, []);
+
+  //for logout the user and admin both
 
   const logout = async () => {
     await signOut(auth);
     setUser(null);
     AsyncStorage.removeItem("adminToken");
     AsyncStorage.removeItem("userToken");
-    navigation.navigate("Welcome");
+    showToast("Logout Sucessfully.", "success");
+    navigation.navigate("SelectRole");
   };
 
   return (

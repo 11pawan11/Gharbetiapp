@@ -1,21 +1,19 @@
 import color from "@/app/constants/color";
 import CustomText from "@/app/hook/customText";
 import CustomView from "@/app/hook/customView";
-import { Snackbar } from "react-native-paper";
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
-  KeyboardTypeOptions,
+  TextInput,
   StyleSheet,
   View,
+  KeyboardTypeOptions,
 } from "react-native";
 import {
   BorderlessButton,
-  TextInput,
   TouchableOpacity,
 } from "react-native-gesture-handler";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { doc, setDoc } from "firebase/firestore";
 import {
@@ -25,80 +23,42 @@ import {
 import { auth, db } from "@/app/firebase/configuration";
 import { useNavigation } from "expo-router";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useToast } from "@/app/hook/customToast";
 
 type RootStackParamList = {
   Register: undefined;
   SelectRole: undefined;
 };
 
+interface Errors {
+  fullname?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+}
 type NavigationProps = StackNavigationProp<RootStackParamList, "SelectRole">;
+
 const Register = () => {
-  const [secureTextEntry, setSecureTextEntry] = useState<{
-    password: boolean;
-    confirmPassword: boolean;
-  }>({
+  const [secureTextEntry, setSecureTextEntry] = useState({
     password: true,
     confirmPassword: true,
   });
-  const [showError, setShowError] = useState(false);
+  const [showError, setShowError] = useState<Errors>({});
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setconfirmPassword] = useState("");
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const { showToast } = useToast();
   const navigation = useNavigation<NavigationProps>();
-  const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const labelRegister: {
-    label: string;
-    placeholder: string;
-    value: string;
-    secureTextEntry: boolean;
-    keyboardType: KeyboardTypeOptions;
-    minLength: number;
-  }[] = [
-    {
-      label: "Full Name",
-      placeholder: "Enter your fullname",
-      value: fullname,
-      secureTextEntry: false,
-      keyboardType: "default",
-      minLength: 6,
-    },
-    {
-      label: "Email",
-      placeholder: "Enter your email",
-      value: email,
-      secureTextEntry: false,
-      keyboardType: "email-address",
-      minLength: 6,
-    },
-    {
-      label: "Phone Number",
-      placeholder: "Enter your phone number",
-      value: phone,
-      secureTextEntry: false,
-      keyboardType: "numeric",
-      minLength: 6,
-    },
-    {
-      label: "Password",
-      placeholder: "Enter your password",
-      value: password,
-      secureTextEntry: secureTextEntry.password,
-      keyboardType: "default",
-      minLength: 6,
-    },
-    {
-      label: "Confirm Password",
-      placeholder: "Confirm your password",
-      value: confirmPassword,
-      secureTextEntry: secureTextEntry.confirmPassword,
-      keyboardType: "default",
-      minLength: 6,
-    },
-  ];
+  // Input references
+  const fullnameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const toggleSecureTextEntry = (field: "password" | "confirmPassword") => {
     setSecureTextEntry((prevState) => ({
@@ -107,20 +67,46 @@ const Register = () => {
     }));
   };
 
-  const handleCreateUser = async () => {
-    if (!fullname || !password || !confirmPassword || !email || !phone) {
-      setShowError(true);
-      setSnackbarMessage("Please fill all fields correctly!");
-      setSnackbarVisible(true);
-      return;
+  const validateInputs = () => {
+    const error: Errors = {};
+
+    if (fullname.length < 6) {
+      showToast("Full Name must be at least 6 characters.", "error");
+      fullnameRef.current?.focus();
+      setShowError((prev) => ({ ...prev, fullname: "error" }));
+      return false;
+    }
+    if (!email.includes("@") || !email.includes(".")) {
+      showToast("Please enter a valid email address.", "error");
+      emailRef.current?.focus();
+      setShowError((prev) => ({ ...prev, email: "error" }));
+      return false;
+    }
+    if (phone.length !== 10) {
+      showToast("Phone number must be exactly 10 digits.", "error");
+      phoneRef.current?.focus();
+      setShowError((prev) => ({ ...prev, phone: "error" }));
+      return false;
+    }
+    if (password.length < 6) {
+      showToast("Password must be at least 6 characters.", "error");
+      passwordRef.current?.focus();
+      setShowError((prev) => ({ ...prev, password: "error" }));
+      return false;
+    }
+    if (password !== confirmPassword) {
+      showToast("Passwords do not match.", "error");
+      confirmPasswordRef.current?.focus();
+      setShowError((prev) => ({ ...prev, confirmPassword: "error" }));
+      return false;
     }
 
-    if (password !== confirmPassword) {
-      setShowError(true);
-      setSnackbarMessage("Passwords do not match!");
-      setSnackbarVisible(true);
-      return;
-    }
+    setShowError({});
+    return true;
+  };
+
+  const handleCreateUser = async () => {
+    if (!validateInputs()) return;
 
     try {
       const createUser = await createUserWithEmailAndPassword(
@@ -130,12 +116,7 @@ const Register = () => {
       );
       const user = createUser.user;
       await sendEmailVerification(user);
-      if (email === user.email) {
-        setShowError(true);
-        setSnackbarMessage("Already exist ");
-        setSnackbarVisible(true);
-      }
-      // Set user data in Firestore
+
       await setDoc(doc(db, "adminUser", user.uid), {
         fullname,
         email,
@@ -143,28 +124,21 @@ const Register = () => {
         role: "admin",
         isVerified: false,
       });
+      showToast("Registered Successfully! Verification email sent.", "success");
+      navigation.goBack();
 
-      setSnackbarMessage("Registration successful! Redirecting...");
-      setSnackbarVisible(true);
-
-      // Show success snackbar, reset form fields and navigate after a delay
-      setTimeout(() => {
-        setSnackbarVisible(false); // Dismiss Snackbar after 3 seconds
-        navigation.navigate("SelectRole"); // Navigate to the next screen after snackbar closes
-      }, 3000);
-
-      // Reset form fields after success
       setFullname("");
       setEmail("");
       setPhone("");
       setPassword("");
-      setconfirmPassword("");
+      setConfirmPassword("");
     } catch (error: any) {
-      setSnackbarMessage(
-        `"Something went wrong. Please try again.,  ${error.message}"`
-      );
-      setSnackbarVisible(true);
-      console.error(error.message);
+      if (error.code === "auth/email-already-in-use") {
+        showToast("Email already in use", "error");
+        emailRef.current?.focus();
+      } else {
+        showToast(`Something went wrong: ${error.message}`, "error");
+      }
     }
   };
 
@@ -177,37 +151,77 @@ const Register = () => {
         />
         <CustomText style={styles.text}>Register Account</CustomText>
 
-        {labelRegister.map((item) => (
-          <KeyboardAvoidingView>
-            <View key={item.label} style={styles.inputContainer}>
+        {[
+          {
+            label: "Full Name",
+            value: fullname,
+            placeholder: "Enter your fullname",
+            onChangeText: setFullname,
+            ref: fullnameRef,
+            error: showError.fullname,
+          },
+          {
+            label: "Email",
+            value: email,
+            placeholder: "Enter your email",
+            onChangeText: setEmail,
+            ref: emailRef,
+            error: showError.email,
+          },
+          {
+            label: "Phone Number",
+            value: phone,
+            placeholder: "Enter your phone number",
+            onChangeText: setPhone,
+            ref: phoneRef,
+            error: showError.phone,
+            keyboardType: "numeric",
+          },
+          {
+            label: "Password",
+            value: password,
+            placeholder: "Enter your password",
+            onChangeText: setPassword,
+            ref: passwordRef,
+            error: showError.password,
+            secureTextEntry: secureTextEntry.password,
+          },
+          {
+            label: "Confirm Password",
+            value: confirmPassword,
+            placeholder: "Confirm your password",
+            onChangeText: setConfirmPassword,
+            ref: confirmPasswordRef,
+            error: showError.confirmPassword,
+            secureTextEntry: secureTextEntry.confirmPassword,
+          },
+        ].map((item, index) => (
+          <KeyboardAvoidingView key={index}>
+            <View style={styles.inputContainer}>
               <CustomText style={styles.labelText}>{item.label}</CustomText>
               <View
                 style={[
                   styles.passwordContainer,
-                  showError && !item.value ? styles.errorColor : null,
+                  item.error ? styles.errorColor : styles.focusColor,
                 ]}
               >
                 <TextInput
-                  style={[styles.input]}
+                  ref={item.ref}
+                  style={styles.input}
                   placeholder={item.placeholder}
                   secureTextEntry={item.secureTextEntry}
-                  keyboardType={item.keyboardType}
-                  underlineColorAndroid="transparent"
                   onChangeText={(text) => {
-                    if (item.label === "Full Name") {
-                      setFullname(text);
-                    } else if (item.label === "Email") {
-                      setEmail(text);
-                    } else if (item.label === "Phone Number") {
-                      setPhone(text);
-                    } else if (item.label === "Password") {
-                      setPassword(text);
-                    } else if (item.label === "Confirm Password") {
-                      setconfirmPassword(text);
-                    }
+                    item.onChangeText(text);
+                    setShowError((prev) => ({
+                      ...prev,
+                      [item.label.toLowerCase()]: undefined,
+                    }));
                   }}
+                  value={item.value}
+                  keyboardType={
+                    (item.keyboardType as KeyboardTypeOptions) || "default"
+                  }
                 />
-
                 {item.label.toLowerCase().includes("password") && (
                   <TouchableOpacity
                     onPress={() =>
@@ -238,20 +252,10 @@ const Register = () => {
             </View>
           </KeyboardAvoidingView>
         ))}
-        <BorderlessButton
-          style={styles.button}
-          onPress={() => handleCreateUser()}
-        >
+
+        <BorderlessButton style={styles.button} onPress={handleCreateUser}>
           <CustomText style={styles.buttonText}>Submit</CustomText>
         </BorderlessButton>
-
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-        >
-          {snackbarMessage}
-        </Snackbar>
       </View>
     </CustomView>
   );
@@ -310,9 +314,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   errorColor: {
-    borderColor: color.red,
-    borderWidth: 1,
-    borderRadius: 5,
+    borderColor: "red",
+  },
+  focusColor: {
+    borderColor: "gray",
   },
 });
 

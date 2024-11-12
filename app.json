@@ -5,17 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/gharbeti.png",
-    "resizeMode": "center",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "platforms": ["ios", "android", "web"],
     "splash": {
-      "image": "./assets/images/gharbeti.gif",
-      "resizeMode": "contain",
+      "image": "./assets/images/gharbeti2.png",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "pawanupreti.com.np"
     },
     "android": {
       "adaptiveIcon": {

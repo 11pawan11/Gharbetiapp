@@ -1,6 +1,6 @@
 // route.ts
 import WelcomeScreen from "../screens/user/welcomeScreen";
-import LoginScreen from "../login/loginPage";
+import LoginScreen from "../login/userLogin";
 import AvailableRooms from "../screens/user/availableRoom";
 import Setting from "../screens/user/setting";
 import MyRoom from "../screens/user/myRoom";

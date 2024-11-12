@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Alert, Image, StyleSheet, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useThemeMode } from "@/app/context/themeContext";
@@ -9,6 +16,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/configuration";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
+import { useToast } from "@/app/hook/customToast";
 
 const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState("");
@@ -16,11 +24,24 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
   const [isPasswordVisible, setPasswordVisble] = useState(false);
   const [showError, setshowError] = useState(false);
   const { themeStyle } = useThemeMode();
+  const { showToast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const signInWithEmailPasswords = async () => {
     if (!email || !password) {
       setshowError(true);
+      showToast("Please fill in both email and password", "error");
+      return;
     }
+    // Validate email format using a regular expression
+    const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex pattern
+    if (!emailValidate.test(email)) {
+      setshowError(true);
+      showToast("Enter a valid email", "error");
+      return;
+    }
+
+    setLoading(true);
     try {
       const userCrefdential = await signInWithEmailAndPassword(
         auth,
@@ -30,8 +51,8 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
       const user = userCrefdential.user;
       const token = await user.getIdToken();
 
-      Alert.alert("Login Sucessfully", `${user.email}`);
       await AsyncStorage.setItem("adminToken", token);
+      showToast("Login Sucessfully", "success");
       navigation.dispatch(
         CommonActions.navigate({
           name: "NavigationRoute",
@@ -39,10 +60,20 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
         })
       );
     } catch (error: any) {
-      Alert.alert("Something went wrong. Login Failed.", error.message);
+      // Check if the error code is related to invalid credentials
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/user-not-found"
+      ) {
+        showToast("Invalid credentials", "error");
+      } else {
+        showToast(`Something went wrong: ${error}`, "error");
+      }
+    } finally {
+      setLoading(false);
     }
   };
-  console.log("test", navigation.getState().routeNames);
 
   const backgroundTheme = themeStyle(color.black, color.white);
   const buttonColor = themeStyle(color.headerColor, color.headerColor);
@@ -102,7 +133,7 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
           Forgot Password ?
         </CustomText>
         <CustomText
-          style={[login.registerFormText]}
+          style={[login.registerFormText, { color: textColor }]}
           onPress={() => navigation.navigate("registerForm")}
         >
           Donot have account click here?
@@ -131,6 +162,11 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
           </CustomText>
         </View>
       </TouchableOpacity>
+      {loading && (
+        <View style={login.loaderContainer}>
+          <ActivityIndicator size={"large"} color={color.red} />
+        </View>
+      )}
     </View>
   );
 };
@@ -207,6 +243,13 @@ const login = StyleSheet.create({
   },
   registerFormText: {
     fontSize: 18,
+  },
+  loaderContainer: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    zIndex: 999,
   },
 });
 

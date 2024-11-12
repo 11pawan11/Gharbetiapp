@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 import {
-  CardStyleInterpolators,
   createStackNavigator,
   StackNavigationProp,
 } from "@react-navigation/stack";
@@ -23,11 +22,11 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import color from "./constants/color";
 import { useThemeMode } from "./context/themeContext";
-import LoginScreen from "./login/loginPage";
 import Register from "./screens/admin/login/register";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
+import UserLogin from "./login/userLogin";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -98,8 +97,6 @@ const LoginRole = ({ navigation }: { navigation: any }) => {
   const textColor = themeStyle(color.white, color.black);
   const textLoginColor = themeStyle(color.white, color.white);
   const backgroundTheme = themeStyle(color.black, color.headerColor);
-
-  console.log("best", navigation.getState().routeNames);
 
   return (
     <CustomView style={{ flex: 1, backgroundColor: backgroundTheme }}>
@@ -226,119 +223,115 @@ const AppNavigator = () => {
         headerShown: false,
       }}
     >
-      {firstTime ? (
-        <Stack.Screen
-          name="Welcome"
-          component={FirstWelcomeScreen}
-          options={{
-            gestureDirection: "horizontal",
-            transitionSpec: {
-              open: {
-                animation: "spring",
-                config: { stiffness: 100, damping: 20, mass: 0.5 },
-              },
-              close: { animation: "timing", config: { duration: 300 } },
+      <Stack.Screen
+        name="Welcome"
+        component={FirstWelcomeScreen}
+        options={{
+          gestureDirection: "horizontal",
+          transitionSpec: {
+            open: {
+              animation: "spring",
+              config: { stiffness: 100, damping: 20, mass: 0.5 },
             },
-            cardStyleInterpolator: ({ current, layouts }) => ({
-              cardStyle: {
-                transform: [
-                  {
-                    translateX: current.progress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [layouts.screen.width, 0],
-                    }),
-                  },
-                ],
-              },
-            }),
-          }}
-        />
-      ) : (
-        <>
-          {/* //drawer navigation */}
-          <Stack.Screen name="NavigationRoute" component={NavigationRoute} />
+            close: { animation: "timing", config: { duration: 300 } },
+          },
+          cardStyleInterpolator: ({ current, layouts }) => ({
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
+                },
+              ],
+            },
+          }),
+        }}
+      />
 
-          <Stack.Screen
-            name="SelectRole"
-            component={LoginRole}
-            options={{
-              gestureDirection: "horizontal",
-              transitionSpec: {
-                open: {
-                  animation: "spring",
-                  config: { stiffness: 100, damping: 20, mass: 0.5 },
+      {/* //drawer navigation */}
+      <Stack.Screen name="NavigationRoute" component={NavigationRoute} />
+
+      <Stack.Screen
+        name="SelectRole"
+        component={LoginRole}
+        options={{
+          gestureDirection: "horizontal",
+          transitionSpec: {
+            open: {
+              animation: "spring",
+              config: { stiffness: 100, damping: 20, mass: 0.5 },
+            },
+            close: { animation: "timing", config: { duration: 300 } },
+          },
+          cardStyleInterpolator: ({ current, layouts }) => ({
+            cardStyle: {
+              transform: [
+                {
+                  translateX: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.width, 0],
+                  }),
                 },
-                close: { animation: "timing", config: { duration: 300 } },
-              },
-              cardStyleInterpolator: ({ current, layouts }) => ({
-                cardStyle: {
-                  transform: [
-                    {
-                      translateX: current.progress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [layouts.screen.width, 0],
-                      }),
-                    },
-                  ],
+              ],
+            },
+          }),
+        }}
+      />
+      <Stack.Screen
+        name="AdminLogin"
+        component={AdminLoginScreen}
+        options={{
+          gestureDirection: "vertical",
+          transitionSpec: {
+            open: {
+              animation: "spring",
+              config: { stiffness: 80, damping: 10 },
+            },
+            close: { animation: "timing", config: { duration: 300 } },
+          },
+          cardStyleInterpolator: ({ current, layouts }) => ({
+            cardStyle: {
+              transform: [
+                {
+                  translateY: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.height, 0],
+                  }),
                 },
-              }),
-            }}
-          />
-          <Stack.Screen
-            name="AdminLogin"
-            component={AdminLoginScreen}
-            options={{
-              gestureDirection: "vertical",
-              transitionSpec: {
-                open: {
-                  animation: "spring",
-                  config: { stiffness: 80, damping: 10 },
+              ],
+            },
+          }),
+        }}
+      />
+      <Stack.Screen
+        options={{
+          gestureDirection: "vertical",
+          transitionSpec: {
+            open: {
+              animation: "spring",
+              config: { stiffness: 80, damping: 10 },
+            },
+            close: { animation: "timing", config: { duration: 300 } },
+          },
+          cardStyleInterpolator: ({ current, layouts }) => ({
+            cardStyle: {
+              transform: [
+                {
+                  translateY: current.progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [layouts.screen.height, 0],
+                  }),
                 },
-                close: { animation: "timing", config: { duration: 300 } },
-              },
-              cardStyleInterpolator: ({ current, layouts }) => ({
-                cardStyle: {
-                  transform: [
-                    {
-                      translateY: current.progress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [layouts.screen.height, 0],
-                      }),
-                    },
-                  ],
-                },
-              }),
-            }}
-          />
-          <Stack.Screen
-            options={{
-              gestureDirection: "vertical",
-              transitionSpec: {
-                open: {
-                  animation: "spring",
-                  config: { stiffness: 80, damping: 10 },
-                },
-                close: { animation: "timing", config: { duration: 300 } },
-              },
-              cardStyleInterpolator: ({ current, layouts }) => ({
-                cardStyle: {
-                  transform: [
-                    {
-                      translateY: current.progress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [layouts.screen.height, 0],
-                      }),
-                    },
-                  ],
-                },
-              }),
-            }}
-            name="UserLogin"
-            component={LoginScreen}
-          />
-          <Stack.Screen name="registerForm" component={Register} />
-        </>
-      )}
+              ],
+            },
+          }),
+        }}
+        name="UserLogin"
+        component={UserLogin}
+      />
+      <Stack.Screen name="registerForm" component={Register} />
     </Stack.Navigator>
   );
 };

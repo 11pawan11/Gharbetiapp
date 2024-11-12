@@ -7,17 +7,30 @@ import color from "@/app/constants/color";
 import CustomText from "@/app/hook/customText";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/configuration";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CommonActions } from "@react-navigation/native";
+import { useToast } from "@/app/hook/customToast";
 
-const LoginScreen = ({ navigation }: { navigation: any }) => {
+const UserLogin = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setPasswordVisble] = useState(false);
   const [showError, setshowError] = useState(false);
   const { themeStyle } = useThemeMode();
+  const { showToast } = useToast();
 
   const signInWithEmailPasswords = async () => {
     if (!email || !password) {
       setshowError(true);
+      showToast("Please fill in both email and password", "error");
+      return;
+    }
+    // Validate email format using a regular expression
+    const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex pattern
+    if (!emailValidate.test(email)) {
+      setshowError(true);
+      showToast("Enter a valid email", "error");
+      return;
     }
     try {
       const userCrefdential = await signInWithEmailAndPassword(
@@ -26,10 +39,27 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         password
       );
       const user = userCrefdential.user;
-      Alert.alert("Login Sucessfully", `${user.email}`);
-      navigation.navigate("NavigationRoute");
+      const token = await user.getIdToken();
+
+      await AsyncStorage.setItem("adminToken", token);
+      showToast("Login Sucessfully", "success");
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: "NavigationRoute",
+          params: { screen: "Gharbeti Home" },
+        })
+      );
     } catch (error: any) {
-      Alert.alert("Something went wrong. Login Failed.", error.message);
+      // Check if the error code is related to invalid credentials
+      if (
+        error.code === "auth/invalid-email" ||
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/user-not-found"
+      ) {
+        showToast("Invalid credentials", "error");
+      } else {
+        showToast(`Something went wrong: ${error}`, "error");
+      }
     }
   };
 
@@ -59,9 +89,8 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         ]}
         placeholder="Enter your email"
         inputMode="email"
-        value={email}
-        autoFocus
-        onChangeText={(text) => setEmail(text)}
+        value={email.toLowerCase()}
+        onChangeText={(text) => setEmail(text.toLowerCase())}
       />
       <CustomText style={[login.text, { color: textColor }]}>
         Password
@@ -86,6 +115,17 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
           size={25}
           color={iconColor}
         />
+      </View>
+      <View style={login.registerForm}>
+        <CustomText style={[login.registerFormText, { color: color.red }]}>
+          Forgot Password ?
+        </CustomText>
+        <CustomText
+          style={[login.registerFormText, { color: textColor }]}
+          onPress={() => navigation.navigate("registerForm")}
+        >
+          Donot have account click here?
+        </CustomText>
       </View>
 
       <TouchableOpacity onPress={() => signInWithEmailPasswords()}>
@@ -124,7 +164,6 @@ const login = StyleSheet.create({
   headerText: {
     fontSize: 30,
     textAlign: "center",
-    marginBottom: 30,
   },
   input: {
     borderWidth: 1,
@@ -176,12 +215,18 @@ const login = StyleSheet.create({
   },
   imageStyle: {
     width: 200,
-    height: 20,
+    height: 80,
     alignSelf: "center",
     justifyContent: "center",
-    marginVertical: 20,
     padding: 20,
+  },
+  registerForm: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  registerFormText: {
+    fontSize: 18,
   },
 });
 
-export default LoginScreen;
+export default UserLogin;
