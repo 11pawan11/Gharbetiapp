@@ -7,8 +7,10 @@ import color from "@/app/constants/color";
 import CustomText from "@/app/hook/customText";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/firebase/configuration";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CommonActions } from "@react-navigation/native";
 
-const LoginScreen = ({ navigation }: { navigation: any }) => {
+const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setPasswordVisble] = useState(false);
@@ -26,12 +28,21 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         password
       );
       const user = userCrefdential.user;
+      const token = await user.getIdToken();
+
       Alert.alert("Login Sucessfully", `${user.email}`);
-      navigation.navigate("NavigationRoute");
+      await AsyncStorage.setItem("adminToken", token);
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: "NavigationRoute",
+          params: { screen: "Gharbeti Home" },
+        })
+      );
     } catch (error: any) {
       Alert.alert("Something went wrong. Login Failed.", error.message);
     }
   };
+  console.log("test", navigation.getState().routeNames);
 
   const backgroundTheme = themeStyle(color.black, color.white);
   const buttonColor = themeStyle(color.headerColor, color.headerColor);
@@ -43,11 +54,11 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
     <View style={[login.container, { backgroundColor: backgroundTheme }]}>
       <Image
         style={login.imageStyle}
-        source={require("../../assets/images/gharbeti2.png")}
+        source={require("../../../../assets/images/gharbeti2.png")}
         resizeMode="contain"
       />
       <CustomText style={[login.headerText, { color: textColor }]}>
-        Welcome User Login
+        Welcome Gharbeti Login
       </CustomText>
 
       <CustomText style={[login.text, { color: textColor }]}>Email</CustomText>
@@ -59,9 +70,8 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
         ]}
         placeholder="Enter your email"
         inputMode="email"
-        value={email}
-        autoFocus
-        onChangeText={(text) => setEmail(text)}
+        value={email.toLowerCase()}
+        onChangeText={(text) => setEmail(text.toLowerCase())}
       />
       <CustomText style={[login.text, { color: textColor }]}>
         Password
@@ -86,6 +96,17 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
           size={25}
           color={iconColor}
         />
+      </View>
+      <View style={login.registerForm}>
+        <CustomText style={[login.registerFormText, { color: color.red }]}>
+          Forgot Password ?
+        </CustomText>
+        <CustomText
+          style={[login.registerFormText]}
+          onPress={() => navigation.navigate("registerForm")}
+        >
+          Donot have account click here?
+        </CustomText>
       </View>
 
       <TouchableOpacity onPress={() => signInWithEmailPasswords()}>
@@ -124,7 +145,6 @@ const login = StyleSheet.create({
   headerText: {
     fontSize: 30,
     textAlign: "center",
-    marginBottom: 30,
   },
   input: {
     borderWidth: 1,
@@ -176,12 +196,18 @@ const login = StyleSheet.create({
   },
   imageStyle: {
     width: 200,
-    height: 20,
+    height: 80,
     alignSelf: "center",
     justifyContent: "center",
-    marginVertical: 20,
     padding: 20,
+  },
+  registerForm: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  registerFormText: {
+    fontSize: 18,
   },
 });
 
-export default LoginScreen;
+export default AdminLoginScreen;

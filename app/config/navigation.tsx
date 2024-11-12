@@ -1,48 +1,80 @@
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
 import { NavigationContainer, useTheme } from "@react-navigation/native";
 import color from "../constants/color";
-import { View, Image, StatusBar, StyleSheet, Alert } from "react-native";
-import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
+import { View, Image, StatusBar, StyleSheet } from "react-native";
+import { Entypo, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
 import coreRoutes from "./route";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Loader from "../util/loader";
 import { useThemeMode } from "../context/themeContext";
+import { useUserRoleChecker } from "../context/userAuthentication";
+import { getDocs } from "firebase/firestore";
+import React from "react";
 
 const Drawer = createDrawerNavigator();
 
-const CustomDrawerContent = (props: any) => (
-  <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
-    {/* Drawer header with image */}
-    <View style={indexStyles.drawerHeader}>
-      <Image
-        style={indexStyles.bar}
-        source={require("../../assets/images/gharbeti3.png")}
-        resizeMode="cover"
+const CustomDrawerContent = (props: any) => {
+  const { logout } = useUserRoleChecker();
+  const { themeStyle } = useThemeMode();
+  const iconColor = themeStyle(color.white, color.headerColor);
+  const drawerTextColor = themeStyle(color.white, color.headerColor);
+
+  // Handle logout functionality
+  const handleLogout = () => {
+    logout(); // Call logout from context
+  };
+
+  // Ensure the component returns JSX
+  return (
+    <DrawerContentScrollView
+      {...props}
+      contentContainerStyle={{ paddingTop: 0 }}
+    >
+      {/* Drawer header with image */}
+      <View style={indexStyles.drawerHeader}>
+        <Image
+          style={indexStyles.bar}
+          source={require("../../assets/images/gharbeti3.png")}
+          resizeMode="cover"
+        />
+      </View>
+      {/* Drawer items */}
+      <DrawerItemList {...props} />
+      {/* Add Logout item */}
+      <DrawerItem
+        icon={({ color, size }) => (
+          <AntDesign name="logout" size={24} color={iconColor} />
+        )}
+        label="Logout"
+        labelStyle={{
+          fontSize: 18, // Set font size
+          fontWeight: "bold", // Bold font weight
+          color: drawerTextColor, // Custom font color (change as needed)
+        }}
+        onPress={handleLogout}
       />
-    </View>
-    {/* Drawer items */}
-    <DrawerItemList {...props} />
-  </DrawerContentScrollView>
-);
+    </DrawerContentScrollView>
+  );
+};
 
 const NavigationRoute = () => {
   const { isDarkMode, toggleTheme, themeStyle } = useThemeMode();
-
-  const backgroundColorOfTheme = themeStyle(color.headerGray, color.headerColor);
+  const backgroundColorOfTheme = themeStyle(
+    color.headerColor,
+    color.headerColor
+  );
   const backgroundColorofDrawer = themeStyle(color.headerGray, color.white);
   const iconColor = themeStyle(color.white, color.headerColor);
   const drawerTextColor = themeStyle(color.white, color.headerColor);
   const drawerActiveTintColor = themeStyle(color.black, color.skyblue);
 
-
   return (
-    <NavigationContainer independent={true}>
-      <StatusBar barStyle="light-content" backgroundColor={color.tomato} />
+    <>
+      <StatusBar barStyle="light-content" backgroundColor={color.headerColor} />
       <Suspense fallback={<Loader />}>
         <Drawer.Navigator
           initialRouteName="Gharbeti Home"
@@ -53,7 +85,6 @@ const NavigationRoute = () => {
             drawerIcon: () => (
               <Entypo name="home" size={24} color={color.darkGray} />
             ),
-            //this is responsible for the decresing the status or navigation bar height
             headerStatusBarHeight: 0,
             headerTintColor: color.white,
             headerTitleStyle: {
@@ -96,12 +127,11 @@ const NavigationRoute = () => {
                   backgroundColor: backgroundColorofDrawer,
                 },
                 drawerLabelStyle: {
-                  color:drawerTextColor,
+                  color: drawerTextColor,
                   fontSize: 16,
                   fontWeight: "bold",
                 },
                 drawerIcon: () => {
-                  // List of valid Entypo icons
                   const validEntypoIcons = [
                     "home",
                     "folder",
@@ -114,7 +144,6 @@ const NavigationRoute = () => {
                     "users",
                   ];
 
-                  // Check if router.icon exists in the Entypo icon list
                   const isEntypoIcon = validEntypoIcons.includes(router.icon);
 
                   return isEntypoIcon ? (
@@ -138,7 +167,7 @@ const NavigationRoute = () => {
           ))}
         </Drawer.Navigator>
       </Suspense>
-    </NavigationContainer>
+    </>
   );
 };
 

@@ -25,7 +25,7 @@ const WelcomeScreen = () => {
   return (
     <ScrollView style={{ backgroundColor: backgroundScene }}>
       <View style={welcomScreens.container}>
-        <StatusBar barStyle="light-content" backgroundColor={color.tomato} />
+        <StatusBar barStyle="light-content" backgroundColor={color.nebiBlue} />
         {/* Main container with backgroundColor and text color applied dynamically */}
         <View style={welcomScreens.block}>
           <TouchableOpacity

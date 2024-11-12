@@ -1,11 +1,16 @@
-import { SafeAreaView, ScrollView } from "react-native";
-import NavigationRoute from "./config/navigation";
+import { NavigationContainer } from "@react-navigation/native";
 import { ThemeProvider } from "./context/themeContext";
+import { UserRoleCheckProvider } from "./context/userAuthentication";
+import AppNavigator from "./veryFistScreen";
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <NavigationRoute />
-    </ThemeProvider>
+    <NavigationContainer independent={true}>
+      <UserRoleCheckProvider>
+        <ThemeProvider>
+          <AppNavigator />
+        </ThemeProvider>
+      </UserRoleCheckProvider>
+    </NavigationContainer>
   );
 }

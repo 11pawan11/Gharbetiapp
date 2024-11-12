@@ -8,8 +8,9 @@
     "resizeMode": "center",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "platforms": ["ios", "android", "web"],
     "splash": {
-      "image": "./assets/images/gharbeti3.png",
+      "image": "./assets/images/gharbeti.gif",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,9 +29,7 @@
       "output": "static",
       "favicon": "./assets/images/gharbeti.png"
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
     },

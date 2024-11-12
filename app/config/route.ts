@@ -7,6 +7,8 @@ import MyRoom from "../screens/user/myRoom";
 import PaymentSection from "@/app/screens/user/paymentSection";
 import AboutUs from "../screens/user/aboutUs";
 import Home from "../screens/admin/home";
+import AddTotalRooms from "../screens/admin/addTotalRooms";
+import AdminLoginScreen from "../screens/admin/login/adminloginPage";
 
 // Lazy load your screens
 // const WelcomeScreen = lazy(() => import("../screens/welcomeScreen"));
@@ -14,25 +16,26 @@ import Home from "../screens/admin/home";
 // const Setting = lazy(() => import("../screens/setting"));
 // const Login = lazy(() => import("../login/loginPage"));
 
-
-
 const coreRoutes = [
   //user routes
   {
     name: "Gharbeti Home",
     component: WelcomeScreen,
     icon: "home",
+    role: "user",
   },
   {
     name: "My Room",
     component: MyRoom,
     icon: "users",
+    role: "user",
   },
 
   {
     name: "Available Rooms",
     component: AvailableRooms,
     icon: "folder",
+    role: "user",
   },
   {
     name: "About Us",
@@ -43,22 +46,27 @@ const coreRoutes = [
     name: "Settings",
     component: Setting,
     icon: "cog",
+    role: "user",
   },
   {
     name: "Payment QR",
     component: PaymentSection,
     icon: "qrcode",
+    role: "user",
   },
-  {
-    name: "Login",
-    component: LoginScreen,
-    icon: "login",
-  },
+
   //admin routes
   {
     name: "Home",
     component: Home,
     icon: "home",
+    role: "admin",
+  },
+  {
+    name: "Add Total Rooms",
+    component: AddTotalRooms,
+    icon: "addfile",
+    role: "admin",
   },
 ];
 
