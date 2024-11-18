@@ -1,23 +1,20 @@
-// route.ts
-import WelcomeScreen from "../screens/user/welcomeScreen";
-import LoginScreen from "../login/userLogin";
-import AvailableRooms from "../screens/user/availableRoom";
-import Setting from "../screens/user/setting";
-import MyRoom from "../screens/user/myRoom";
-import PaymentSection from "@/app/screens/user/paymentSection";
-import AboutUs from "../screens/user/aboutUs";
-import Home from "../screens/admin/home";
-import AddTotalRooms from "../screens/admin/addTotalRooms";
-import AdminLoginScreen from "../screens/admin/login/adminloginPage";
+import React, { lazy } from "react";
 
-// Lazy load your screens
-// const WelcomeScreen = lazy(() => import("../screens/welcomeScreen"));
-// const AvailableRooms = lazy(() => import("../screens/availableRoom"));
-// const Setting = lazy(() => import("../screens/setting"));
-// const Login = lazy(() => import("../login/loginPage"));
+// Lazy load components
+const WelcomeScreen = lazy(() => import("../screens/user/welcomeScreen"));
+const AvailableRooms = lazy(() => import("../screens/user/availableRoom"));
+const Setting = lazy(() => import("../screens/user/setting"));
+const MyRoom = lazy(() => import("../screens/user/myRoom"));
+const PaymentSection = lazy(() => import("../screens/user/paymentSection"));
+const AboutUs = lazy(() => import("../screens/user/aboutUs"));
+const Home = lazy(() => import("../screens/admin/home"));
+const AddTotalRooms = lazy(() => import("../screens/admin/addTotalRooms"));
+const AdminLoginScreen = lazy(
+  () => import("../screens/admin/login/adminloginPage")
+);
 
-const coreRoutes = [
-  //user routes
+export const coreRoutes = [
+  // user routes
   {
     name: "Gharbeti Home",
     component: WelcomeScreen,
@@ -30,7 +27,6 @@ const coreRoutes = [
     icon: "users",
     role: "user",
   },
-
   {
     name: "Available Rooms",
     component: AvailableRooms,
@@ -55,7 +51,7 @@ const coreRoutes = [
     role: "user",
   },
 
-  //admin routes
+  // admin routes
   {
     name: "Home",
     component: Home,
@@ -70,4 +66,3 @@ const coreRoutes = [
   },
 ];
 
-export default coreRoutes;

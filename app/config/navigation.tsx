@@ -1,5 +1,4 @@
 import { createDrawerNavigator, DrawerItem } from "@react-navigation/drawer";
-import { NavigationContainer, useTheme } from "@react-navigation/native";
 import color from "../constants/color";
 import { View, Image, StatusBar, StyleSheet } from "react-native";
 import { Entypo, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
@@ -7,13 +6,12 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import coreRoutes from "./route";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Loader from "../util/loader";
 import { useThemeMode } from "../context/themeContext";
 import { useUserRoleChecker } from "../context/userAuthentication";
-import { getDocs } from "firebase/firestore";
 import React from "react";
+import { coreRoutes } from "./route";
 
 const Drawer = createDrawerNavigator();
 
@@ -22,6 +20,7 @@ const CustomDrawerContent = (props: any) => {
   const { themeStyle } = useThemeMode();
   const iconColor = themeStyle(color.white, color.headerColor);
   const drawerTextColor = themeStyle(color.white, color.headerColor);
+  
 
   // Handle logout functionality
   const handleLogout = () => {
@@ -71,6 +70,10 @@ const NavigationRoute = () => {
   const iconColor = themeStyle(color.white, color.headerColor);
   const drawerTextColor = themeStyle(color.white, color.headerColor);
   const drawerActiveTintColor = themeStyle(color.black, color.skyblue);
+  const { adminDetails,user } = useUserRoleChecker();
+
+console.log("Resst of the cods",adminDetails);
+
 
   return (
     <>
@@ -118,11 +121,11 @@ const NavigationRoute = () => {
             <Drawer.Screen
               key={index}
               name={router.name}
-              component={router.component}
+              // component={router.component}
               options={{
                 drawerActiveTintColor: drawerTextColor,
                 drawerActiveBackgroundColor: drawerActiveTintColor,
-                drawerType: "slide",
+                drawerType: "back",
                 drawerStyle: {
                   backgroundColor: backgroundColorofDrawer,
                 },
@@ -163,7 +166,13 @@ const NavigationRoute = () => {
 
                 drawerLabel: router.name,
               }}
-            />
+            >
+              {(props) => (
+                <Suspense fallback={<Loader />}>
+                  <router.component {...props} />
+                </Suspense>
+              )}
+            </Drawer.Screen>
           ))}
         </Drawer.Navigator>
       </Suspense>

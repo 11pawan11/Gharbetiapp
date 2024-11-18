@@ -95,7 +95,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             <TouchableOpacity
               onPress={() => hideToast(toast.id)}
               style={{
-                backgroundColor: themeStyle(color.offWhite, color.black),
+                backgroundColor: themeStyle(color.lightBlue, color.black),
                 borderRadius: 100,
                 justifyContent: "center",
                 alignSelf: "center",

@@ -117,7 +117,7 @@ const Register = () => {
       const user = createUser.user;
       await sendEmailVerification(user);
 
-      await setDoc(doc(db, "adminUser", user.uid), {
+      await setDoc(doc(db, "adminUser", "userList"), {
         fullname,
         email,
         phone,

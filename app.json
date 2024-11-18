@@ -8,10 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "platforms": ["ios", "android", "web"],
-    "splash": {
-      "image": "./assets/images/gharbeti2.png",
-      "backgroundColor": "#ffffff"
-    },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pawanupreti.com.np"

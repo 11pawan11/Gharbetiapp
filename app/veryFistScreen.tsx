@@ -23,10 +23,9 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import color from "./constants/color";
 import { useThemeMode } from "./context/themeContext";
 import Register from "./screens/admin/login/register";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import UserLogin from "./login/userLogin";
+import SplashScreen from "./screens/splashScreen";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -34,6 +33,7 @@ export type RootStackParamList = {
   AdminLogin: undefined;
   UserLogin: undefined;
   NavigationRoute: undefined;
+  SplashScreens: undefined;
 };
 
 const FirstWelcomeScreen = () => {
@@ -171,58 +171,18 @@ const LoginRole = ({ navigation }: { navigation: any }) => {
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const [isLogin, setIsLogin] = useState<boolean | null>(null);
-  const [firstTime, setFirstTime] = useState<boolean | null>(null);
-
-  //is login or not
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const token = await AsyncStorage.getItem("adminToken");
-        setIsLogin(!!token);
-      } catch (error: any) {
-        console.error("Token not found", error.message);
-      }
-    };
-
-    //check the user firsttime or not
-    const checkFirstTime = async () => {
-      try {
-        const isFirstTime = await AsyncStorage.getItem("isFirstTime");
-        if (isFirstTime === null) {
-          await AsyncStorage.setItem("isFirstTime", "false");
-          setFirstTime(true);
-        } else {
-          setFirstTime(false);
-        }
-      } catch (error: any) {
-        console.error("Something went wrong", error.message);
-      }
-    };
-
-    checkFirstTime();
-    checkLoginStatus();
-  }, []);
-
-  // Define the initial route based on firstTime and isLogin
-  if (firstTime === null || isLogin === null) {
-    // Optionally, return a loading screen while async tasks complete
-    return null;
-  }
-
-  const initaialRoute = firstTime
-    ? "Welcome"
-    : isLogin
-    ? "NavigationRoute"
-    : "SelectRole";
+  
+ 
 
   return (
     <Stack.Navigator
-      initialRouteName={initaialRoute}
+      initialRouteName="SplashScreen"
       screenOptions={{
         headerShown: false,
       }}
     >
+      <Stack.Screen name="SplashScreens" component={SplashScreen} />
+
       <Stack.Screen
         name="Welcome"
         component={FirstWelcomeScreen}
@@ -462,3 +422,4 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 });
+

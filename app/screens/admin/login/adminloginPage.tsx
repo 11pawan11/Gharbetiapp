@@ -1,12 +1,7 @@
-import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, Image, StyleSheet, View } from "react-native";
+
+import { Button, TextInput } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useThemeMode } from "@/app/context/themeContext";
@@ -17,15 +12,33 @@ import { auth } from "@/app/firebase/configuration";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CommonActions } from "@react-navigation/native";
 import { useToast } from "@/app/hook/customToast";
+import Loader from "@/app/util/loader";
+import { Checkbox } from "react-native-paper";
 
 const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setPasswordVisble] = useState(false);
   const [showError, setshowError] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // Manage the "Remember Me" state
   const { themeStyle } = useThemeMode();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  // Load "Remember Me" state from AsyncStorage when the component mounts
+  useEffect(() => {
+    // Load saved credentials if remember me was checked
+    const loadCredentials = async () => {
+      const savedEmail = await AsyncStorage.getItem("rememberedEmail");
+      const savedPassword = await AsyncStorage.getItem("rememberedPassword");
+      if (savedEmail && savedPassword) {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+      }
+    };
+    loadCredentials();
+  }, []);
 
   const signInWithEmailPasswords = async () => {
     if (!email || !password) {
@@ -33,7 +46,6 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
       showToast("Please fill in both email and password", "error");
       return;
     }
-    // Validate email format using a regular expression
     const emailValidate = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex pattern
     if (!emailValidate.test(email)) {
       setshowError(true);
@@ -43,16 +55,25 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
 
     setLoading(true);
     try {
-      const userCrefdential = await signInWithEmailAndPassword(
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
-      const user = userCrefdential.user;
+      const user = userCredential.user;
       const token = await user.getIdToken();
 
       await AsyncStorage.setItem("adminToken", token);
-      showToast("Login Sucessfully", "success");
+
+      // Store "Remember Me" preference in AsyncStorage
+      if (rememberMe) {
+        await AsyncStorage.setItem("rememberedEmail", email);
+        await AsyncStorage.setItem("rememberedPassword", password);
+      } else {
+        await AsyncStorage.removeItem("rememberedEmail");
+        await AsyncStorage.removeItem("rememberedPassword");
+      }
+      showToast("Login Successfully", "success");
       navigation.dispatch(
         CommonActions.navigate({
           name: "NavigationRoute",
@@ -60,7 +81,6 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
         })
       );
     } catch (error: any) {
-      // Check if the error code is related to invalid credentials
       if (
         error.code === "auth/invalid-email" ||
         error.code === "auth/wrong-password" ||
@@ -80,19 +100,29 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
   const buttonTextColor = themeStyle(color.black, color.white);
   const iconColor = themeStyle(color.white, color.black);
   const textColor = themeStyle(color.white, color.gray);
+  const imageBg = themeStyle(color.white, color.headerColor);
 
   return (
     <View style={[login.container, { backgroundColor: backgroundTheme }]}>
-      <Image
-        style={login.imageStyle}
-        source={require("../../../../assets/images/gharbeti2.png")}
-        resizeMode="contain"
-      />
+      <View
+        style={{
+          backgroundColor: imageBg,
+          // justifyContent: "center",
+          alignItems: "center",
+          borderRadius: 50,
+          marginBottom: 5,
+        }}
+      >
+        <Image
+          style={[login.imageStyle]}
+          source={require("../../../../assets/images/gharbeti2.png")}
+          resizeMode="contain"
+        />
+      </View>
       <CustomText style={[login.headerText, { color: textColor }]}>
         Welcome Gharbeti Login
       </CustomText>
-
-      <CustomText style={[login.text, { color: textColor }]}>Email</CustomText>
+      {/* <CustomText style={[login.text, { color: textColor }]}>Email</CustomText> */}
       <TextInput
         style={[
           login.input,
@@ -103,7 +133,11 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
         inputMode="email"
         value={email.toLowerCase()}
         onChangeText={(text) => setEmail(text.toLowerCase())}
+        mode="outlined"
+        label={"Email"}
+        activeOutlineColor="white"
       />
+
       <CustomText style={[login.text, { color: textColor }]}>
         Password
       </CustomText>
@@ -128,6 +162,14 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
           color={iconColor}
         />
       </View>
+      <View style={login.checkboxContainer}>
+        <Checkbox
+          status={rememberMe ? "checked" : "unchecked"}
+          onPress={() => setRememberMe(!rememberMe)}
+          color={color.headerColor} // Customize the checkbox color
+        />
+        <CustomText style={{ color: textColor }}>Remember Me</CustomText>
+      </View>
       <View style={login.registerForm}>
         <CustomText style={[login.registerFormText, { color: color.red }]}>
           Forgot Password ?
@@ -136,40 +178,43 @@ const AdminLoginScreen = ({ navigation }: { navigation: any }) => {
           style={[login.registerFormText, { color: textColor }]}
           onPress={() => navigation.navigate("registerForm")}
         >
-          Donot have account click here?
+          Don’t have an account? Click here
         </CustomText>
       </View>
-
-      <TouchableOpacity onPress={() => signInWithEmailPasswords()}>
-        <CustomText
-          style={[
-            login.buttonText,
-            { backgroundColor: buttonColor, color: buttonTextColor },
-          ]}
-        >
+      {/* Remember Me Checkbox */}
+      <Button
+        mode="outlined"
+        buttonColor={buttonColor}
+        onPress={() => signInWithEmailPasswords()}
+        style={{ padding: 3, borderRadius: 5 }}
+      >
+        <CustomText style={[login.buttonText, { color: buttonTextColor }]}>
           Login
         </CustomText>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[{ backgroundColor: buttonColor }]}
-        onPress={() => Alert.alert("Not implemented yer")}
-      >
-        <View style={[login.buttons]}>
-          <AntDesign name="google" size={20} color={buttonTextColor} />
+      </Button>
 
-          <CustomText style={[login.buttonsGoogle, { color: buttonTextColor }]}>
-            Login with Google
-          </CustomText>
-        </View>
-      </TouchableOpacity>
-      {loading && (
-        <View style={login.loaderContainer}>
-          <ActivityIndicator size={"large"} color={color.red} />
-        </View>
-      )}
+      {/* //login with google  */}
+      <Button
+        mode="outlined"
+        buttonColor={buttonColor}
+        style={[login.buttons]}
+        onPress={() => Alert.alert("Not implemented yet")}
+      >
+        <AntDesign
+          name="google"
+          size={20}
+          color={buttonTextColor}
+          style={{ marginRight: 5 }}
+        />
+        <CustomText style={[login.buttonsGoogle, { color: buttonTextColor }]}>
+          Login with Google
+        </CustomText>
+      </Button>
+      {loading && <Loader />}
     </View>
   );
 };
+
 const login = StyleSheet.create({
   container: {
     padding: 20,
@@ -183,8 +228,6 @@ const login = StyleSheet.create({
     textAlign: "center",
   },
   input: {
-    borderWidth: 1,
-    padding: 10,
     borderRadius: 5,
     borderColor: "lightgray",
     fontSize: 18,
@@ -199,17 +242,15 @@ const login = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    borderRadius: 5,
-    borderWidth: 0.5,
   },
   buttonsGoogle: {
     fontSize: 20,
     fontWeight: "800",
-    padding: 10,
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    borderRadius: 5,
+    marginLeft: 5,
+    padding: 5,
   },
   icon: {
     padding: 0,
@@ -228,28 +269,26 @@ const login = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 5,
-    borderWidth: 0.5,
+    gap: 5,
   },
   imageStyle: {
     width: 200,
-    height: 80,
     alignSelf: "center",
     justifyContent: "center",
-    padding: 20,
+    marginVertical: 10,
   },
   registerForm: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginVertical: 10,
   },
   registerFormText: {
-    fontSize: 18,
+    fontSize: 14,
   },
-  loaderContainer: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    zIndex: 999,
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
   },
 });
 
